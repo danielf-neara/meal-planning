@@ -204,7 +204,10 @@ function renderRecipes() {
     <div class="view-recipes">
       <div class="toolbar">
         <input type="search" class="search-input" id="r-search" placeholder="Search recipes..." value="${escAttr(state.search)}">
-        <button class="btn btn-primary" id="add-btn">+ Add Recipe</button>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn btn-outline" id="import-url-btn">Import URL</button>
+          <button class="btn btn-primary" id="add-btn">+ Add Recipe</button>
+        </div>
       </div>
       ${recipes.length === 0 ? `
         <div class="empty-state">
@@ -227,6 +230,7 @@ function renderRecipes() {
   });
 
   document.getElementById('add-btn').addEventListener('click', () => showRecipeForm());
+  document.getElementById('import-url-btn').addEventListener('click', () => showUrlImport());
   document.getElementById('empty-add')?.addEventListener('click', () => showRecipeForm());
 
   document.querySelectorAll('.recipe-card').forEach(card => {
@@ -339,14 +343,14 @@ function showRecipeDetail(id) {
 
 // ─── Recipe Form ──────────────────────────────────────────────────────────────
 
-function showRecipeForm(id = null) {
-  const r = id ? state.data.recipes.find(x => x.id === id) : null;
+function showRecipeForm(id = null, prefill = null) {
+  const r = id ? state.data.recipes.find(x => x.id === id) : prefill;
   const ings = r?.ingredients?.length ? r.ingredients : [{ amount: '', unit: '', item: '' }];
   const steps = r?.steps?.length ? r.steps : [''];
 
   openModal(`
     <div class="form-view">
-      <h2>${r ? 'Edit Recipe' : 'Add Recipe'}</h2>
+      <h2>${id ? 'Edit Recipe' : prefill ? 'Review Imported Recipe' : 'Add Recipe'}</h2>
       <form id="recipe-form" autocomplete="off">
         <div class="field">
           <label class="field-label" for="f-name">Recipe Name *</label>
@@ -400,7 +404,7 @@ function showRecipeForm(id = null) {
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-outline" id="form-cancel">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="form-submit">${r ? 'Save Changes' : 'Add Recipe'}</button>
+          <button type="submit" class="btn btn-primary" id="form-submit">${id ? 'Save Changes' : 'Add Recipe'}</button>
         </div>
       </form>
     </div>
@@ -520,6 +524,175 @@ async function commitRecipe(data, id = null) {
   setStatus('Saving...');
   await saveData();
   flashStatus('Saved');
+}
+
+// ─── URL Import ───────────────────────────────────────────────────────────────
+
+function showUrlImport() {
+  openModal(`
+    <div class="form-view">
+      <h2>Import from URL</h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px">
+        Paste a link to any recipe website. Works with most major recipe sites.
+      </p>
+      <div class="field">
+        <label class="field-label" for="import-url">Recipe URL</label>
+        <input type="url" id="import-url" class="input" placeholder="https://www.recipetineats.com/..." autofocus>
+      </div>
+      <div id="import-error" style="display:none" class="alert alert-error"></div>
+      <div class="form-actions">
+        <button class="btn btn-outline" id="import-cancel">Cancel</button>
+        <button class="btn btn-primary" id="import-go">Import Recipe</button>
+      </div>
+    </div>
+  `, '');
+
+  document.getElementById('import-url').focus();
+  document.getElementById('import-cancel').addEventListener('click', closeModal);
+
+  const go = document.getElementById('import-go');
+  go.addEventListener('click', async () => {
+    const url = document.getElementById('import-url').value.trim();
+    if (!url) return;
+
+    go.disabled = true;
+    go.textContent = 'Fetching...';
+    document.getElementById('import-error').style.display = 'none';
+
+    try {
+      const recipe = await fetchRecipeFromUrl(url);
+      closeModal();
+      showRecipeForm(null, recipe);
+    } catch (e) {
+      go.disabled = false;
+      go.textContent = 'Import Recipe';
+      const err = document.getElementById('import-error');
+      err.textContent = e.message;
+      err.style.display = 'block';
+    }
+  });
+
+  document.getElementById('import-url').addEventListener('keydown', e => {
+    if (e.key === 'Enter') go.click();
+  });
+}
+
+async function fetchRecipeFromUrl(url) {
+  const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  let html;
+  try {
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error('Could not fetch page');
+    html = await res.text();
+  } catch (e) {
+    throw new Error('Could not load that URL. Check it is a valid recipe page and try again.');
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Try JSON-LD first (most reliable -- used by RecipeTin, Taste, BBC Food, etc.)
+  const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of scripts) {
+    try {
+      const data = JSON.parse(script.textContent);
+      const recipe = findRecipeSchema(data);
+      if (recipe) return mapSchemaToRecipe(recipe, url);
+    } catch (_) { /* skip malformed blocks */ }
+  }
+
+  throw new Error('No recipe found on that page. The site may not use a supported format. Try copying and pasting the recipe text instead.');
+}
+
+function findRecipeSchema(data) {
+  if (!data) return null;
+  // Handle single object
+  if (data['@type'] === 'Recipe') return data;
+  // Handle array of types (e.g. ["Recipe", "Thing"])
+  if (Array.isArray(data['@type']) && data['@type'].includes('Recipe')) return data;
+  // Handle @graph array
+  if (Array.isArray(data['@graph'])) {
+    for (const item of data['@graph']) {
+      const found = findRecipeSchema(item);
+      if (found) return found;
+    }
+  }
+  // Handle top-level array
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const found = findRecipeSchema(item);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function mapSchemaToRecipe(schema, sourceUrl) {
+  const ingredients = (schema.recipeIngredient || []).map(parseIngredient);
+  const steps = parseInstructions(schema.recipeInstructions);
+
+  const tagSources = [
+    ...(schema.recipeCategory ? [schema.recipeCategory].flat() : []),
+    ...(schema.recipeCuisine ? [schema.recipeCuisine].flat() : []),
+    ...(schema.keywords ? String(schema.keywords).split(',').map(s => s.trim()) : []),
+  ];
+  const tags = [...new Set(tagSources.map(t => t.trim()).filter(Boolean))].slice(0, 6);
+
+  return {
+    name: schema.name || '',
+    description: schema.description ? stripHtml(schema.description) : '',
+    servings: parseServings(schema.recipeYield),
+    prepTime: parseIsoDuration(schema.prepTime),
+    cookTime: parseIsoDuration(schema.cookTime),
+    source: new URL(sourceUrl).hostname.replace(/^www\./, ''),
+    sourceUrl,
+    tags,
+    ingredients,
+    steps,
+    notes: '',
+  };
+}
+
+function parseIsoDuration(str) {
+  if (!str) return 0;
+  const m = String(str).match(/PT(?:(\d+)H)?(?:(\d+)M)?/i);
+  if (!m) return 0;
+  return (parseInt(m[1] || 0) * 60) + parseInt(m[2] || 0);
+}
+
+function parseServings(val) {
+  if (!val) return null;
+  if (typeof val === 'number') return val;
+  const m = String(val).match(/\d+/);
+  return m ? parseInt(m[0]) : null;
+}
+
+const UNITS_RE = /^([\d¼½¾⅐-⅞\/\s]+(?:\.\d+)?)\s*(g|kg|ml|l|litre|litres|liter|liters|tsp|teaspoon|teaspoons|tbsp|tablespoon|tablespoons|cup|cups|oz|lb|lbs|pound|pounds|bunch|bunches|clove|cloves|slice|slices|tin|tins|can|cans|packet|packets|pinch|handful|handful|sprig|sprigs|rasher|rashers|fillet|fillets|stalk|stalks)\b\.?\s+(.+)$/i;
+const NUM_RE = /^([\d¼½¾\/]+(?:\.\d+)?)\s+(.+)$/;
+
+function parseIngredient(str) {
+  const s = stripHtml(str).trim();
+  let m = s.match(UNITS_RE);
+  if (m) return { amount: m[1].trim(), unit: m[2].trim(), item: m[3].trim() };
+  m = s.match(NUM_RE);
+  if (m) return { amount: m[1].trim(), unit: '', item: m[2].trim() };
+  return { amount: '', unit: '', item: s };
+}
+
+function parseInstructions(instructions) {
+  if (!instructions) return [];
+  if (typeof instructions === 'string') return [stripHtml(instructions)].filter(Boolean);
+  return instructions.flatMap(item => {
+    if (typeof item === 'string') return stripHtml(item);
+    if (item['@type'] === 'HowToSection') {
+      return (item.itemListElement || []).map(s => stripHtml(s.text || s.name || ''));
+    }
+    return stripHtml(item.text || item.name || '');
+  }).filter(Boolean);
+}
+
+function stripHtml(str) {
+  return String(str || '').replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').trim();
 }
 
 async function deleteRecipe(id) {
