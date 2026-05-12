@@ -1,4 +1,34 @@
 {
-  "recipes": [],
+  "recipes": [
+    {
+      "name": "Grilled salmon",
+      "description": "Air fried or bbq'd salmon",
+      "servings": 4,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [
+        "Fish"
+      ],
+      "ingredients": [
+        {
+          "amount": "2",
+          "unit": "fillets",
+          "item": "Salmon (skin off)"
+        },
+        {
+          "amount": "1",
+          "unit": "fillets",
+          "item": "Salmon (skin on)"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mp1yuwa6svgmy",
+      "createdAt": "2026-05-12",
+      "updatedAt": "2026-05-12"
+    }
+  ],
   "plans": {}
 }
