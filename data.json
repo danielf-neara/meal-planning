@@ -158,6 +158,43 @@
       "id": "mpbw8dws3ae3k",
       "createdAt": "2026-05-19",
       "updatedAt": "2026-05-19"
+    },
+    {
+      "name": "Spinnach rice",
+      "description": "",
+      "servings": null,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [],
+      "ingredients": [
+        {
+          "amount": "1",
+          "unit": "packet",
+          "item": "fresh spinach leaves"
+        },
+        {
+          "amount": "1",
+          "unit": "",
+          "item": "Brown onion"
+        },
+        {
+          "amount": "1",
+          "unit": "cup",
+          "item": "Jasmine rice"
+        },
+        {
+          "amount": "1",
+          "unit": "teaspoon",
+          "item": "Chicken stock"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mpbwac8szv6dg",
+      "createdAt": "2026-05-19",
+      "updatedAt": "2026-05-19"
     }
   ],
   "plans": {}
