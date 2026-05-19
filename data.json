@@ -92,6 +92,28 @@
       "id": "mpbw5wxvh0owq",
       "createdAt": "2026-05-19",
       "updatedAt": "2026-05-19"
+    },
+    {
+      "name": "Roast sweet potato",
+      "description": "",
+      "servings": null,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [],
+      "ingredients": [
+        {
+          "amount": "1",
+          "unit": "piece",
+          "item": "orange sweet potato"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mpbw7d0kzgjmk",
+      "createdAt": "2026-05-19",
+      "updatedAt": "2026-05-19"
     }
   ],
   "plans": {}
