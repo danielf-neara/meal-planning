@@ -43,6 +43,26 @@
           "amount": "2",
           "unit": "bunch",
           "item": "Dutch carrots"
+        },
+        {
+          "amount": "1",
+          "unit": "bunch",
+          "item": "Cauliflower"
+        },
+        {
+          "amount": "1",
+          "unit": "Block",
+          "item": "Halloumi"
+        },
+        {
+          "amount": "1",
+          "unit": "Packet",
+          "item": "Israeli cous cous"
+        },
+        {
+          "amount": "1",
+          "unit": "Bunch",
+          "item": "Mixed lettuce"
         }
       ],
       "steps": [],
