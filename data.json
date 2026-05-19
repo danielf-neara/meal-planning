@@ -136,6 +136,28 @@
       "id": "mpbw7puh9rthp",
       "createdAt": "2026-05-19",
       "updatedAt": "2026-05-19"
+    },
+    {
+      "name": "Pasta (plain)",
+      "description": "",
+      "servings": null,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [],
+      "ingredients": [
+        {
+          "amount": "1",
+          "unit": "Packet",
+          "item": "Rigatoni pasta"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mpbw8dws3ae3k",
+      "createdAt": "2026-05-19",
+      "updatedAt": "2026-05-19"
     }
   ],
   "plans": {}
