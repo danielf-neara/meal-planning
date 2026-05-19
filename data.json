@@ -28,6 +28,28 @@
       "id": "mp1yuwa6svgmy",
       "createdAt": "2026-05-12",
       "updatedAt": "2026-05-12"
+    },
+    {
+      "name": "Halloumi salad",
+      "description": "",
+      "servings": 2,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [],
+      "ingredients": [
+        {
+          "amount": "2",
+          "unit": "bunch",
+          "item": "Dutch carrots"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mpbw39fzivcib",
+      "createdAt": "2026-05-19",
+      "updatedAt": "2026-05-19"
     }
   ],
   "plans": {}
