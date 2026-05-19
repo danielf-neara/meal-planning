@@ -114,6 +114,28 @@
       "id": "mpbw7d0kzgjmk",
       "createdAt": "2026-05-19",
       "updatedAt": "2026-05-19"
+    },
+    {
+      "name": "Boiled corn",
+      "description": "",
+      "servings": null,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [],
+      "ingredients": [
+        {
+          "amount": "2",
+          "unit": "pieces",
+          "item": "corn"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mpbw7puh9rthp",
+      "createdAt": "2026-05-19",
+      "updatedAt": "2026-05-19"
     }
   ],
   "plans": {}
