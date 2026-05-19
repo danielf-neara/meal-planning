@@ -70,6 +70,28 @@
       "id": "mpbw39fzivcib",
       "createdAt": "2026-05-19",
       "updatedAt": "2026-05-19"
+    },
+    {
+      "name": "Bbq chicken thighs",
+      "description": "",
+      "servings": 4,
+      "prepTime": 0,
+      "cookTime": 0,
+      "source": "",
+      "sourceUrl": "",
+      "tags": [],
+      "ingredients": [
+        {
+          "amount": "6",
+          "unit": "pieces",
+          "item": "chicken thighs"
+        }
+      ],
+      "steps": [],
+      "notes": "",
+      "id": "mpbw5wxvh0owq",
+      "createdAt": "2026-05-19",
+      "updatedAt": "2026-05-19"
     }
   ],
   "plans": {}
